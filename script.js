@@ -1,60 +1,77 @@
-// 1. Capturas el elemento de la fecha que agregaste en el HTML
-const todoDate = document.getElementById('todo-date');
-const completedCounter = document.getElementById('completed-counter'); // Para el comodín
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Corrección de IDs para enlazar correctamente con el HTML
+    const entradaTarea = document.getElementById("task-input");
+    const entradaFecha = document.getElementById("task-date"); // <- Tu parte
+    const botonAgregar = document.getElementById("add-task-btn");
+    const listaTareas = document.getElementById("task-list");
 
-// 2. En el evento del formulario ('submit'), capturas el valor de la fecha
-todoForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const taskText = todoInput.value.trim();
-    const taskDate = todoDate.value; // Guardas la fecha ingresada
+    // 2. Elementos del contador (Tu parte - Comodín)
+    const contadorCompletadas = document.getElementById("completed-count");
+    const contadorTotal = document.getElementById("total-count");
 
-    if (!taskText || !taskDate) return;
+    // 3. Función para actualizar el contador dinámicamente (Tu parte - Comodín)
+    function actualizarContador() {
+        const totalTareas = listaTareas.querySelectorAll("li").length;
+        // Cuenta las tareas que tengan la clase "completada"
+        const tareasCompletadas = listaTareas.querySelectorAll("li.completada").length;
 
-    const newTodo = {
-        id: Date.now(),
-        text: taskText,
-        date: formatDate(taskDate), // Tu parte: Guardas la fecha formateada en el objeto
-        completed: false
-    };
+        contadorTotal.textContent = totalTareas;
+        contadorCompletadas.textContent = tareasCompletadas;
+    }
 
-    todos.push(newTodo);
-    renderTodos();
-    todoForm.reset();
-});
+    function agregarTarea() {
+        const textoTarea = entradaTarea.value.trim();
+        const fechaTarea = entradaFecha.value; // <- Tu parte: Capturar la fecha
 
-// Función de apoyo para que la fecha se vea ordenada (Ej: "13 jul 2026")
-function formatDate(dateString) {
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
-    const dateObj = new Date(dateString + 'T00:00:00'); 
-    return dateObj.toLocaleDateString('es-ES', options);
-}
+        if (textoTarea === "") {
+            alert("Escribe una tarea antes de agregarla.");
+            entradaTarea.focus();
+            return;
+        }
 
-// 3. Tu parte (Comodín): Función para calcular y actualizar el contador en pantalla
-function updateStats() {
-    const total = todos.length;
-    const completed = todos.filter(todo => todo.completed).length;
-    completedCounter.textContent = `Terminadas: ${completed} / ${total}`;
-}
+        // Validación para que no agreguen tareas sin fecha
+        if (fechaTarea === "") {
+            alert("Por favor, selecciona una fecha de vencimiento.");
+            entradaFecha.focus();
+            return;
+        }
 
-// 4. Asegúrate de que en la función renderTodos() se dibuje la fecha y se llame a tu contador
-function renderTodos() {
-    todoList.innerHTML = '';
-    todos.forEach(todo => {
-        const li = document.createElement('li');
-        li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-        li.innerHTML = `
-            <div class="todo-item-content">
-                <span class="todo-text">${todo.text}</span>
-                <!-- AQUÍ SE MUESTRA TU FECHA -->
-                <span class="todo-date-badge">⏱ ${todo.date}</span> 
-            </div>
-            <div class="todo-actions">
-                <button class="btn-action btn-complete" onclick="toggleComplete(${todo.id})">✓</button>
-                <button class="btn-action btn-delete" onclick="deleteTodo(${todo.id})">🗑</button>
-            </div>
+        const nuevaTarea = document.createElement("li");
+        
+        // Tu parte: Insertar el texto de la tarea junto con la fecha de vencimiento
+        nuevaTarea.innerHTML = `
+            <span class="tarea-texto">${textoTarea}</span>
+            <span class="tarea-fecha" style="margin-left: 10px; color: #888; font-size: 0.9em;">
+                📅 ${fechaTarea}
+            </span>
         `;
-        todoList.appendChild(li);
-    });
 
-    updateStats(); // Tu parte (Comodín): Llamas a la función para actualizar el contador
-}
+        // Pequeña lógica para que puedas probar tu contador: 
+        // Al hacer clic en la tarea, se marca/desmarca como completada
+        nuevaTarea.addEventListener("click", () => {
+            nuevaTarea.classList.toggle("completada");
+            // Se ve visualmente tachada (puedes agregar esto en el CSS de tus compañeros)
+            nuevaTarea.style.textDecoration = nuevaTarea.classList.contains("completada") ? "line-through" : "none";
+            actualizarContador(); // Actualizas el contador al marcar/desmarcar
+        });
+
+        listaTareas.appendChild(nuevaTarea);
+
+        // Limpiar campos después de agregar
+        entradaTarea.value = "";
+        entradaFecha.value = "";
+        
+        // Actualizar el contador total tras agregar una nueva tarea
+        actualizarContador(); 
+        
+        entradaTarea.focus();
+    }
+
+    botonAgregar.addEventListener("click", agregarTarea);
+
+    entradaTarea.addEventListener("keydown", (evento) => {
+        if (evento.key === "Enter") {
+            agregarTarea();
+        }
+    });
+});

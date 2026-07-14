@@ -1,42 +1,77 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Tareas</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Corrección de IDs para enlazar correctamente con el HTML
+    const entradaTarea = document.getElementById("task-input");
+    const entradaFecha = document.getElementById("task-date"); // <- Tu parte
+    const botonAgregar = document.getElementById("add-task-btn");
+    const listaTareas = document.getElementById("task-list");
 
-  <div class="app">
+    // 2. Elementos del contador (Tu parte - Comodín)
+    const contadorCompletadas = document.getElementById("completed-count");
+    const contadorTotal = document.getElementById("total-count");
 
-    <header class="app__header">
-      <h1 class="app__title">Mis Tareas</h1>
-      <p class="app__subtitle">Organiza tu día a día</p>
-    </header>
+    // 3. Función para actualizar el contador dinámicamente (Tu parte - Comodín)
+    function actualizarContador() {
+        const totalTareas = listaTareas.querySelectorAll("li").length;
+        // Cuenta las tareas que tengan la clase "completada"
+        const tareasCompletadas = listaTareas.querySelectorAll("li.completada").length;
 
-    <section class="task-form">
-      <input type="text" id="task-input" class="task-form__input" placeholder="Escribe una nueva tarea...">
-      <input type="date" id="task-date" class="task-form__date">
-      <button id="add-task-btn" class="task-form__button">Agregar</button>
-    </section>
+        contadorTotal.textContent = totalTareas;
+        contadorCompletadas.textContent = tareasCompletadas;
+    }
 
-    <section class="task-summary">
-      <span id="completed-count">0</span> tareas completadas de <span id="total-count">0</span>
-    </section>
+    function agregarTarea() {
+        const textoTarea = entradaTarea.value.trim();
+        const fechaTarea = entradaFecha.value; // <- Tu parte: Capturar la fecha
 
-    <main class="task-list-container">
-      <ul id="task-list" class="task-list">
-        <!-- Las tareas se insertan aquí dinámicamente -->
-      </ul>
-    </main>
+        if (textoTarea === "") {
+            alert("Escribe una tarea antes de agregarla.");
+            entradaTarea.focus();
+            return;
+        }
 
-    <footer class="app__footer">
-      <p>Equipo: Programador 1 · Programador 2 · Programador 3 · Programador 4</p>
-    </footer>
+        // Validación para que no agreguen tareas sin fecha
+        if (fechaTarea === "") {
+            alert("Por favor, selecciona una fecha de vencimiento.");
+            entradaFecha.focus();
+            return;
+        }
 
-  </div>
+        const nuevaTarea = document.createElement("li");
+        
+        // Tu parte: Insertar el texto de la tarea junto con la fecha de vencimiento
+        nuevaTarea.innerHTML = `
+            <span class="tarea-texto">${textoTarea}</span>
+            <span class="tarea-fecha" style="margin-left: 10px; color: #888; font-size: 0.9em;">
+                📅 ${fechaTarea}
+            </span>
+        `;
 
-  <script src="script.js"></script>
-</body>
-</html>
+        // Pequeña lógica para que puedas probar tu contador: 
+        // Al hacer clic en la tarea, se marca/desmarca como completada
+        nuevaTarea.addEventListener("click", () => {
+            nuevaTarea.classList.toggle("completada");
+            // Se ve visualmente tachada (puedes agregar esto en el CSS de tus compañeros)
+            nuevaTarea.style.textDecoration = nuevaTarea.classList.contains("completada") ? "line-through" : "none";
+            actualizarContador(); // Actualizas el contador al marcar/desmarcar
+        });
+
+        listaTareas.appendChild(nuevaTarea);
+
+        // Limpiar campos después de agregar
+        entradaTarea.value = "";
+        entradaFecha.value = "";
+        
+        // Actualizar el contador total tras agregar una nueva tarea
+        actualizarContador(); 
+        
+        entradaTarea.focus();
+    }
+
+    botonAgregar.addEventListener("click", agregarTarea);
+
+    entradaTarea.addEventListener("keydown", (evento) => {
+        if (evento.key === "Enter") {
+            agregarTarea();
+        }
+    });
+});
